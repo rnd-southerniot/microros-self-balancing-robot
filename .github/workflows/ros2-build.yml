@@ -1,0 +1,63 @@
+name: ROS2 workspace build + lint
+
+on:
+  push:
+    paths:
+      - "ros2_ws/**"
+  pull_request:
+    paths:
+      - "ros2_ws/**"
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up ROS2 Humble
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+
+      - name: Install colcon and rosdep dependencies
+        run: |
+          sudo apt-get update
+          sudo rosdep init || true
+          rosdep update
+          cd ros2_ws
+          rosdep install --from-paths src --ignore-src -r -y
+
+      - name: Build workspace
+        run: |
+          cd ros2_ws
+          source /opt/ros/humble/setup.bash
+          colcon build --symlink-install \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release \
+            --event-handlers console_cohesion+
+
+      - name: Run tests
+        run: |
+          cd ros2_ws
+          source /opt/ros/humble/setup.bash
+          source install/setup.bash
+          colcon test --event-handlers console_cohesion+
+          colcon test-result --verbose
+
+      - name: Lint — ament_flake8
+        run: |
+          source /opt/ros/humble/setup.bash
+          cd ros2_ws
+          ament_flake8 src/
+
+      - name: Lint — ament_cpplint
+        run: |
+          source /opt/ros/humble/setup.bash
+          cd ros2_ws
+          ament_cpplint src/
+
+      - name: Lint — ament_xmllint (package.xml)
+        run: |
+          source /opt/ros/humble/setup.bash
+          cd ros2_ws
+          ament_xmllint src/

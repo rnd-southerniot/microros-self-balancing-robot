@@ -1,0 +1,52 @@
+# Dockerfile.ros2
+# ROS2 Humble development environment for Raspberry Pi 5 (ARM64)
+# Includes: ROS2 Humble, Nav2, robot_localization, twist_mux,
+#           colcon, rosdep, and project workspace dependencies.
+#
+# Build:   docker build -f docker/Dockerfile.ros2 -t sbr-ros2:humble .
+# Run dev: docker compose -f docker/docker-compose.yml run ros2
+
+FROM ros:humble-ros-base-jammy
+
+LABEL maintainer="southerniot"
+LABEL description="MicroROS SBR — ROS2 Humble ARM64"
+
+# ── System dependencies ────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    python3-pip \
+    python3-vcstool \
+    ros-humble-robot-localization \
+    ros-humble-twist-mux \
+    ros-humble-teleop-twist-keyboard \
+    ros-humble-tf2-tools \
+    ros-humble-rqt \
+    ros-humble-rqt-common-plugins \
+    ros-humble-nav2-bringup \
+    ros-humble-slam-toolbox \
+    build-essential \
+    cmake \
+    git \
+    curl \
+    wget \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── rosdep initialisation ──────────────────────────────────────────
+RUN rosdep init 2>/dev/null || true && rosdep update
+
+# ── Workspace ──────────────────────────────────────────────────────
+WORKDIR /ros2_ws
+
+# Source ROS2 on shell start
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
+    echo "[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash" \
+    >> /root/.bashrc && \
+    echo "export ROS_DOMAIN_ID=0" >> /root/.bashrc
+
+# ── Entrypoint ─────────────────────────────────────────────────────
+COPY docker/ros2_entrypoint.sh /ros2_entrypoint.sh
+RUN chmod +x /ros2_entrypoint.sh
+ENTRYPOINT ["/ros2_entrypoint.sh"]
+CMD ["bash"]

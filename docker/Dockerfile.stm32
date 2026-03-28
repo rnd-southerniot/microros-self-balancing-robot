@@ -1,0 +1,33 @@
+# Dockerfile.stm32
+# STM32 firmware build environment — arm-none-eabi + PlatformIO CLI
+# Used in CI (GitHub Actions) and local reproducible builds.
+#
+# Build: docker build -f docker/Dockerfile.stm32 -t sbr-stm32:latest .
+# Use:   docker run --rm -v $(pwd)/firmware/stm32:/workspace sbr-stm32:latest \
+#          bash -c "cd /workspace && pio run -e stm32f429"
+
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="southerniot"
+LABEL description="MicroROS SBR — STM32 PlatformIO build"
+
+# ── System dependencies ────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    git \
+    curl \
+    libusb-1.0-0-dev \
+    udev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── PlatformIO CLI ─────────────────────────────────────────────────
+RUN pip install --no-cache-dir platformio
+
+# ── Pre-install STM32 + native platforms (speeds up CI) ───────────
+RUN platformio platform install ststm32 native --with-package framework-stm32cube
+
+WORKDIR /workspace
+
+CMD ["bash"]

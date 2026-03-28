@@ -1,0 +1,62 @@
+# ekf_params.yaml
+# robot_localization EKF node configuration.
+# Fuses /imu/data (ICM-20948) + /odom (wheel encoder odometry)
+# into /odometry/filtered for Nav2 and SLAM consumption.
+#
+# Reference: http://docs.ros.org/en/humble/p/robot_localization/
+
+ekf_filter_node:
+  ros__parameters:
+
+    frequency: 50.0           # EKF update rate Hz
+    sensor_timeout: 0.1       # mark sensor stale after 100 ms
+    two_d_mode: true          # robot operates in 2D (floor)
+    publish_tf: true
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # ── Wheel odometry (/odom) ──────────────────────────────────
+    # [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw,
+    #  ax, ay, az]
+    odom0: /odom
+    odom0_config: [true,  true,  false,   # x, y, z
+                   false, false, true,    # roll, pitch, yaw
+                   true,  false, false,   # vx, vy, vz
+                   false, false, true,    # vroll, vpitch, vyaw
+                   false, false, false]   # ax, ay, az
+    odom0_differential: false
+    odom0_relative: false
+    odom0_queue_size: 10
+
+    # ── IMU (/imu/data, ICM-20948) ──────────────────────────────
+    imu0: /imu/data
+    imu0_config: [false, false, false,   # x, y, z
+                  false, false, false,   # roll, pitch, yaw (from filter)
+                  false, false, false,   # vx, vy, vz
+                  false, false, true,    # vroll, vpitch, vyaw (gyro Z)
+                  true,  true,  false]   # ax, ay, az (accel x/y)
+    imu0_differential: false
+    imu0_relative: false
+    imu0_remove_gravitational_acceleration: true
+    imu0_queue_size: 10
+
+    # ── Process noise ───────────────────────────────────────────
+    # Increase Q values to trust measurements more (less model trust).
+    # Lower R values = trust sensor more.
+    process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0.05, 0,    0,    0,    0,    0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0.06, 0,    0,    0,    0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0.03, 0,    0,    0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0.03, 0,    0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0.06, 0,     0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0.025, 0,    0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0.025,0,    0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0.04, 0,     0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0.01,  0,    0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0,     0.01, 0,    0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0,     0,    0.02, 0,    0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0,     0,    0,    0.01, 0,    0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0,     0,    0,    0,    0.01, 0,
+                                0,   0,    0,    0,    0,    0,    0,     0,    0,    0,     0,    0,    0,    0,    0.015]

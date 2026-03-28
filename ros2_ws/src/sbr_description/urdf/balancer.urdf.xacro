@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<!--
+  balancer.urdf.xacro
+  Robot description for Yahboom MicroROS Self-Balancing Robot
+  Board: STM32F429I-DISC1 + Raspberry Pi 5
+  IMU: ICM-20948 (I2C1)
+
+  Frame tree:
+    base_link
+    └── imu_link        (ICM-20948 mount point)
+    └── left_wheel      (Motor 1)
+    └── right_wheel     (Motor 2)
+    └── laser_frame     (placeholder — lidar phase 5)
+    └── camera_frame    (placeholder — vision phase 6)
+
+  Physical measurements (confirm against your chassis):
+    wheelbase:     0.160 m
+    wheel radius:  0.0335 m
+    wheel width:   0.030 m
+    chassis width: 0.130 m
+    chassis length:0.180 m
+    chassis height:0.060 m (lower plate to upper plate)
+-->
+
+<robot name="sbr" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ── Physical parameters ──────────────────────────────────── -->
+  <xacro:property name="wheelbase"       value="0.160"/>
+  <xacro:property name="wheel_radius"    value="0.0335"/>
+  <xacro:property name="wheel_width"     value="0.030"/>
+  <xacro:property name="chassis_width"   value="0.130"/>
+  <xacro:property name="chassis_length"  value="0.180"/>
+  <xacro:property name="chassis_height"  value="0.060"/>
+  <xacro:property name="chassis_mass"    value="1.200"/>
+  <xacro:property name="wheel_mass"      value="0.100"/>
+
+  <!-- ── Materials ─────────────────────────────────────────────── -->
+  <material name="black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.4 0.8 1.0"/>
+  </material>
+  <material name="gray">
+    <color rgba="0.5 0.5 0.5 1.0"/>
+  </material>
+
+  <!-- ── base_link ─────────────────────────────────────────────── -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${chassis_mass}"/>
+      <inertia
+        ixx="${(1.0/12.0)*chassis_mass*(chassis_width*chassis_width + chassis_height*chassis_height)}"
+        iyy="${(1.0/12.0)*chassis_mass*(chassis_length*chassis_length + chassis_height*chassis_height)}"
+        izz="${(1.0/12.0)*chassis_mass*(chassis_length*chassis_length + chassis_width*chassis_width)}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- ── Left wheel (Motor 1) ──────────────────────────────────── -->
+  <link name="left_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia
+        ixx="${(1.0/12.0)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}"
+        iyy="${(1.0/12.0)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}"
+        izz="${0.5*wheel_mass*wheel_radius*wheel_radius}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="left_wheel"/>
+    <origin xyz="0 ${wheelbase/2} 0" rpy="-${pi/2} 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ── Right wheel (Motor 2) ─────────────────────────────────── -->
+  <link name="right_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia
+        ixx="${(1.0/12.0)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}"
+        iyy="${(1.0/12.0)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}"
+        izz="${0.5*wheel_mass*wheel_radius*wheel_radius}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="right_wheel"/>
+    <origin xyz="0 -${wheelbase/2} 0" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ── IMU link (ICM-20948 mount) ────────────────────────────── -->
+  <!-- Adjust xyz to match physical sensor position on chassis.     -->
+  <link name="imu_link">
+    <visual>
+      <geometry><box size="0.010 0.010 0.003"/></geometry>
+      <material name="gray"/>
+    </visual>
+    <inertial>
+      <mass value="0.005"/>
+      <inertia ixx="1e-6" iyy="1e-6" izz="1e-6" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="0 0 0.030" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ── Laser frame placeholder (Phase 5 — LiDAR) ─────────────── -->
+  <link name="laser_frame"/>
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="laser_frame"/>
+    <origin xyz="0.080 0 0.120" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ── Camera frame placeholder (Phase 6 — Vision) ───────────── -->
+  <link name="camera_frame"/>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="camera_frame"/>
+    <origin xyz="0.090 0 0.100" rpy="0 0 0"/>
+  </joint>
+
+</robot>

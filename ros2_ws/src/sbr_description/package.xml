@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd"
+            schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <n>sbr_description</n>
+  <version>0.1.0</version>
+  <description>
+    URDF / xacro robot description for the Yahboom MicroROS
+    self-balancing robot (STM32F429I-DISC1 + ICM-20948 + Pi 5).
+    Includes placeholder frames for lidar (Phase 5) and camera (Phase 6).
+  </description>
+  <maintainer email="you@example.com">southerniot</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

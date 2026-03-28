@@ -1,0 +1,46 @@
+name: STM32 build + native tests
+
+on:
+  push:
+    paths:
+      - "firmware/stm32/**"
+  pull_request:
+    paths:
+      - "firmware/stm32/**"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware/stm32
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO CLI
+        run: pip install platformio --quiet
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-stm32-${{ hashFiles('firmware/stm32/platformio.ini') }}
+
+      - name: Build STM32 firmware
+        run: pio run -e stm32f429
+
+      - name: Run native unit tests
+        run: pio test -e native --verbose
+
+      - name: Upload firmware ELF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stm32-firmware-elf
+          path: firmware/stm32/.pio/build/stm32f429/*.elf
+          retention-days: 14

@@ -1,0 +1,22 @@
+# SetPidGains.srv
+# Runtime PID gain update — no reflash required.
+# Called by tools/pid_tuner/pid_tuner.py or rqt.
+#
+# loop_id:
+#   0 = angle (inner balance loop)
+#   1 = velocity (outer loop)
+#   2 = steering (yaw)
+#   3 = speed (per-wheel)
+
+uint8  loop_id
+float32 kp
+float32 ki
+float32 kd
+
+---
+
+bool    success
+string  message    # "OK" or error description
+float32 kp_applied # echoes the gains actually set (after clamping)
+float32 ki_applied
+float32 kd_applied

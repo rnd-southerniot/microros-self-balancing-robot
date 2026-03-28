@@ -1,0 +1,22 @@
+# twist_mux.yaml
+# Priority arbitration for /cmd_vel sources.
+# Higher priority number wins. Safety e-stop always wins via a
+# separate override in safety_node (publishes zero directly to /cmd_vel).
+#
+# Priority order (highest first):
+#   1. Nav2 autonomous navigation    (priority 10)
+#   2. Keyboard / APP teleop         (priority 20)
+#   Safety e-stop bypasses twist_mux entirely.
+
+twist_mux:
+  ros__parameters:
+    topics:
+      navigation:
+        topic: /cmd_vel_nav       # Nav2 output
+        timeout: 0.5
+        priority: 10
+
+      teleop:
+        topic: /cmd_vel_teleop    # keyboard / APP bridge
+        timeout: 0.5
+        priority: 20

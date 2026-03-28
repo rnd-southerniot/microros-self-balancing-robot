@@ -1,0 +1,43 @@
+name: ESP32 bridge build
+
+on:
+  push:
+    paths:
+      - "firmware/esp32/**"
+  pull_request:
+    paths:
+      - "firmware/esp32/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware/esp32
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO CLI
+        run: pip install platformio --quiet
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-esp32-${{ hashFiles('firmware/esp32/platformio.ini') }}
+
+      - name: Build ESP32 firmware
+        run: pio run -e esp32-bridge
+
+      - name: Upload firmware binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware-bin
+          path: firmware/esp32/.pio/build/esp32-bridge/*.bin
+          retention-days: 14

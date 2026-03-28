@@ -1,0 +1,59 @@
+version: "3.8"
+
+# docker-compose.yml
+# Raspberry Pi 5 services for MicroROS Self-Balancing Robot
+#
+# Usage:
+#   Start agent:     docker compose up agent
+#   ROS2 dev shell:  docker compose run ros2
+#   Build images:    docker compose build
+#
+# Prerequisites:
+#   - Docker + Docker Compose installed on Pi 5
+#   - Pi 5 and ESP32 on same WiFi network
+#   - ESP32 provisioned with Pi 5 IP via provision_nvs.py
+
+services:
+
+  # ── microROS agent ─────────────────────────────────────────────
+  # Bridges microROS UDP traffic to the full ROS2 graph on Pi 5.
+  # ESP32 connects to Pi 5 IP:8888 over WiFi UDP.
+  agent:
+    image: microros/micro-ros-agent:humble
+    network_mode: host
+    restart: unless-stopped
+    command: udp4 --port 8888 -v4
+    environment:
+      - ROS_DOMAIN_ID=0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/8888"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── ROS2 development / colcon build environment ────────────────
+  # Mount ros2_ws into the container for building and running nodes.
+  # Not started by default — use: docker compose run ros2
+  ros2:
+    build:
+      context: .
+      dockerfile: Dockerfile.ros2
+    network_mode: host
+    volumes:
+      - ../ros2_ws:/ros2_ws
+      - /dev:/dev
+    environment:
+      - ROS_DOMAIN_ID=0
+      - DISPLAY=${DISPLAY:-:0}
+    privileged: true     # needed for /dev/ttyUSB* access
+    stdin_open: true
+    tty: true
+    profiles:
+      - dev              # only starts with: docker compose --profile dev up
+
+networks: {}

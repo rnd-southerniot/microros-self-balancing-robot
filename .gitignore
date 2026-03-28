@@ -1,0 +1,74 @@
+# ── PlatformIO ────────────────────────────────────────────────────
+.pio/
+.pioenvs/
+.piolibdeps/
+firmware/stm32/.pio/
+firmware/esp32/.pio/
+
+# ── ROS2 / colcon ─────────────────────────────────────────────────
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+dist/
+*.egg
+
+# ── Calibration output (not secrets, but machine-specific) ────────
+tools/calibration/imu_calib.yaml
+tools/calibration/*.yaml
+
+# ── NVS binaries (may contain provisioned credentials) ────────────
+*.nvs.bin
+nvs_*.bin
+firmware/esp32/scripts/*.bin
+
+# ── Secrets — NEVER commit ────────────────────────────────────────
+*.env
+.env.*
+wifi_creds.*
+secrets.*
+*_secrets.*
+
+# ── Build artefacts ───────────────────────────────────────────────
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.a
+*.d
+
+# ── IDE / editor ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── macOS ─────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── ROS2 bag files ────────────────────────────────────────────────
+*.db3
+*.mcap
+rosbag*/
+
+# ── Docker ────────────────────────────────────────────────────────
+docker/volumes/
+.docker/
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
+logs/
