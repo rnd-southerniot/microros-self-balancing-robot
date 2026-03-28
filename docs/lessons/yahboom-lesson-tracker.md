@@ -8,22 +8,22 @@ Reference: https://www.yahboom.net/study/SBR-microROS
 
 | # | Lesson | Status | Notes | File |
 |---|--------|--------|-------|------|
-| 1 | Turn on LED light | 🔲 | GPIO OUTPUT on STM32F429 | `src/main.c` |
-| 2 | Button function | 🔲 | PA0 user button | `src/main.c` |
-| 3 | Drive the buzzer | 🔲 | PWM or GPIO toggle | — |
-| 4 | Serial communication | 🔲 | USART1 @ 921600 to ESP32 | `src/uros/` |
-| 5 | Battery voltage detection | 🔲 | ADC on STM32 | — |
-| 6 | Drive PWM servo | 🔲 | TIM output compare | — |
-| 7 | Drive motor | 🔲 | TIM3/TIM4 + H-bridge | `src/motor/motor_driver.c` |
-| 8 | Read motor encoder data | 🔲 | Encoder mode | `src/motor/encoder.c` |
-| 9 | PID controls car speed | 🔲 | Per-wheel speed loop | `src/pid/pid.c` |
-| 10 | Read IMU data | 🔲 | ICM-20948 I2C + L3GD20 SPI | `src/imu/` |
-| 11 | Read radar data | 🔲 | HC-SR04 TIM input capture | `src/sensors/` |
-| 12 | Flash access data | 🔲 | STM32 flash / NVS | — |
-| 13 | Partition table and memory | 🔲 | Memory layout study | — |
-| 14 | Bluetooth communication | 🔲 | Optional — not primary path | — |
-| 15 | WiFi networking | 🔲 | ESP32 WiFi + UDP | `firmware/esp32/src/` |
-| 16 | Robot kinematics analysis | 🔲 | Two-wheel diff drive | `src/motor/odometry.c` |
+| 1 | Turn on LED light | ✅ | PG13/PG14 onboard Discovery LEDs | `src/main.c` |
+| 2 | Button function | ✅ | PA0 user button, boot-time check | `src/main.c` |
+| 3 | Drive the buzzer | ✅ | GPIO toggle via uart_protocol commands | — |
+| 4 | Serial communication | ✅ | USART1 @ 921600, framed binary | `src/uart/uart_protocol.c` |
+| 5 | Battery voltage detection | ✅ | ADC in main loop, published via UART | `src/main.c` |
+| 6 | Drive PWM servo | ⏭️ | Not required — no servo on this chassis | — |
+| 7 | Drive motor | ✅ | TIM3/TIM4 @ 20 kHz, H-bridge GPIO | `src/motor/motor_driver.c` |
+| 8 | Read motor encoder data | ✅ | EXTI quadrature (HW encoder unavail on pins) | `src/motor/encoder.c` |
+| 9 | PID controls car speed | ✅ | Per-wheel speed loop, anti-windup | `src/pid/pid.c` |
+| 10 | Read IMU data | ✅ | ICM-20948 I2C3 + L3GD20 SPI1 cross-check | `src/imu/icm20948.c` |
+| 11 | Read radar data | ✅ | HC-SR04 TIM1 input capture | `src/main.c` |
+| 12 | Flash access data | ⏭️ | Deferred — NVS pattern used on ESP32 side | — |
+| 13 | Partition table and memory | ⏭️ | Deferred — studied, not implemented | — |
+| 14 | Bluetooth communication | ⏭️ | Not required — WiFi path chosen | — |
+| 15 | WiFi networking | ✅ | ESP32 bridge: WiFi UDP relay complete | `firmware/esp32/src/main.cpp` |
+| 16 | Robot kinematics analysis | ✅ | Diff drive, mid-point integration | `src/motor/odometry.c` |
 
 ---
 
