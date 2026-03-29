@@ -3,7 +3,7 @@
 /*
  * icm20948.h
  * Driver for TDK InvenSense ICM-20948 — 9-axis IMU (accel + gyro + mag)
- * Interface: I2C1
+ * Interface: I2C3 (PA8=SCL, PC9=SDA)
  * Address: 0x68 (AD0=GND) or 0x69 (AD0=VDD)
  *
  * Yahboom lesson ref: ESP32 basic §10 (IMU read)

@@ -6,7 +6,7 @@
  * rates, PID gains, and safety thresholds.
  *
  * Hardware: STM32F429I-DISC1
- * IMU primary:   ICM-20948 (I2C1, 9-axis)
+ * IMU primary:   ICM-20948 (I2C3: PA8=SCL, PC9=SDA, 9-axis)
  * IMU secondary: L3GD20    (SPI1, onboard Discovery — cross-check)
  * Motors: 520 encoder motors, x2
  *
@@ -20,7 +20,7 @@
 #define ENCODER_CPR             1320      /* counts/rev: 520 motor + gearbox */
 #define GEAR_RATIO              30.0f     /* internal gear ratio            */
 
-/* ── IMU: ICM-20948 primary (I2C1) ──────────────────────────── */
+/* ── IMU: ICM-20948 primary (I2C3: PA8/PC9) ─────────────────── */
 #define ICM20948_I2C_ADDR       0x68      /* AD0 pin = GND → 0x68          */
 #define ICM20948_GYRO_FSR       2000      /* ±2000 dps full-scale           */
 #define ICM20948_ACCEL_FSR      4         /* ±4g full-scale                 */

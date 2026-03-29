@@ -29,12 +29,12 @@
 
 ---
 
-## IMU: ICM-20948 Primary (I2C1)
+## IMU: ICM-20948 Primary (I2C3)
 
 | Signal | GPIO | Notes |
 |--------|------|-------|
-| SCL | PB6 | I2C1_SCL |
-| SDA | PB9 | I2C1_SDA — **see conflict note below** |
+| SCL | PA8 | I2C3_SCL |
+| SDA | PC9 | I2C3_SDA |
 | I2C address | 0x68 | AD0 = GND |
 | Axes | 9 | Accel + Gyro + Mag |
 
@@ -88,24 +88,15 @@
 
 ---
 
-## ⚠️ Known Pin Conflicts — Must Resolve Before Phase 1
+## ✅ Resolved Pin Conflicts
 
-### Conflict 1: PB7 — I2C1_SDA vs TIM4_CH2
+### Conflict 1: PB7 — RESOLVED
 
-`PB7` is used for **both** Motor 2 PWM (TIM4_CH2, AF2) and I2C1_SDA (AF4).  
-These are alternate functions — only one can be active at a time.
+`PB7` was shared between Motor 2 PWM (TIM4_CH2) and I2C1_SDA (ICM-20948).
+**Resolution:** ICM-20948 moved to **I2C3 (PA8=SCL, PC9=SDA)**.
+PB7 is now exclusively TIM4_CH2 for Motor 2 PWM.
 
-**Resolution options (choose one):**
-
-| Option | Change | Impact |
-|--------|--------|--------|
-| A | Move ICM-20948 to I2C3 (PH7/PH8 or PC9) | Requires rewiring IMU |
-| B | Move Motor 2 PWM to TIM4_CH1 on PB6 | Requires motor board change |
-| C | Move ICM-20948 SDA to PB9 (I2C1 alt) | Check if PB9 is free |
-
-**Action:** Resolve in CubeMX before hardware bring-up. Check schematic for available I2C pads.
-
-### Conflict 2: Encoder timer assignments
+### Open: Encoder timer assignments
 
 `TIM8` and `TIM5` are listed as encoder timers — verify in CubeMX that these:
 - Support encoder mode on F429
@@ -120,13 +111,13 @@ These are alternate functions — only one can be active at a time.
 | Timer | Function | GPIO Pins |
 |-------|----------|-----------|
 | TIM3 | Motor 1 PWM CH1 | PB4 |
-| TIM4 | Motor 2 PWM CH2 | PB7 ⚠️ |
+| TIM4 | Motor 2 PWM CH2 | PB7 |
 | TIM8 | Encoder M1 (proposed) | PC4, PC5 |
 | TIM5 | Encoder M2 (proposed) | PB8, PB9 |
 | TIM1 | HC-SR04 input capture | PE9, PE11 |
 | SPI1 | L3GD20 | Onboard |
 | SPI5 | ILI9341 LCD | Onboard |
-| I2C1 | ICM-20948 | PB6, PB7 ⚠️ |
+| I2C3 | ICM-20948 | PA8, PC9 |
 | USART1 | ESP32 bridge | PA9, PA10 |
 
 ---

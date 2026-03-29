@@ -35,7 +35,7 @@ pio test -e native             # run unit tests on host
 ## Hardware
 
 - MCU: STM32F429ZIT6 @ 180 MHz
-- IMU primary: ICM-20948 (I2C1 @ 0x68) — 9-axis
+- IMU primary: ICM-20948 (I2C3: PA8=SCL, PC9=SDA @ 0x68) — 9-axis
 - IMU secondary: L3GD20 (SPI1) — onboard Discovery, cross-check only
 - Motors: 520 encoder motors via TIM3/TIM4 PWM + GPIO H-bridge
 - UART to ESP32: USART1 @ 921600
@@ -50,7 +50,7 @@ pio test -e native             # run unit tests on host
 
 ## Known issues / TODOs
 
-- PB7 pin conflict: I2C1_SDA vs TIM4_CH2 — must resolve in CubeMX
+- PB7 pin conflict: RESOLVED — ICM-20948 moved to I2C3 (PA8/PC9), PB7 is TIM4_CH2 only
 - Encoder timer assignments (TIM8/TIM5) are placeholders
 - HC-SR04 pins are placeholders — confirm on chassis
 - microROS library integration not yet started (Phase 3)

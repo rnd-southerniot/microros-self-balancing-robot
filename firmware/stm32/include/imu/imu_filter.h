@@ -5,7 +5,7 @@
  * Complementary filter fusing ICM-20948 gyro + accelerometer
  * to produce stable pitch and roll estimates.
  *
- * Primary source: ICM-20948 (I2C1)
+ * Primary source: ICM-20948 (I2C3: PA8/PC9)
  * Secondary/cross-check: L3GD20 (SPI1, onboard Discovery)
  *
  * Theory:

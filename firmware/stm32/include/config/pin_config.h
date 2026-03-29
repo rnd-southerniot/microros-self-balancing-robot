@@ -47,14 +47,13 @@
 #define MOTOR2_ENC_B_PIN        GPIO_PIN_8      /* PB8 → encoder ch B        */
 #define MOTOR2_ENC_TIM          TIM5            /* TODO: confirm encoder TIM */
 
-/* ── IMU: ICM-20948 primary (I2C1) ──────────────────────────── */
-#define ICM20948_I2C            I2C1
-#define ICM20948_SCL_PORT       GPIOB
-#define ICM20948_SCL_PIN        GPIO_PIN_6      /* PB6 → I2C1_SCL           */
-#define ICM20948_SDA_PORT       GPIOB
-#define ICM20948_SDA_PIN        GPIO_PIN_7      /* PB7 — NOTE: shared with  */
-                                                /* MOTOR2 PWM on alt func.  */
-                                                /* Verify no conflict in MX */
+/* ── IMU: ICM-20948 primary (I2C3) ──────────────────────────── */
+/* Moved from I2C1 (PB6/PB7) to I2C3 to free PB7 for TIM4_CH2  */
+#define ICM20948_I2C            I2C3
+#define ICM20948_SCL_PORT       GPIOA
+#define ICM20948_SCL_PIN        GPIO_PIN_8      /* PA8 → I2C3_SCL           */
+#define ICM20948_SDA_PORT       GPIOC
+#define ICM20948_SDA_PIN        GPIO_PIN_9      /* PC9 → I2C3_SDA           */
 
 /* ── IMU: L3GD20 secondary (SPI1, onboard Discovery) ────────── */
 #define L3GD20_SPI              SPI1
@@ -98,10 +97,8 @@
 
 /*
  * VALIDATION NOTES:
- * 1. PB7 is shared between I2C1_SDA (ICM-20948) and TIM4_CH2 (Motor2 PWM).
- *    These are alternate functions — only ONE can be active at a time.
- *    Motor2 PWM must use a different pin or ICM-20948 must use I2C3.
- *    ACTION: Resolve in CubeMX before Phase 1 hardware bring-up.
+ * 1. PB7 conflict RESOLVED: ICM-20948 moved to I2C3 (PA8/PC9).
+ *    PB7 is now exclusively TIM4_CH2 for Motor 2 PWM.
  *
  * 2. Encoder timer assignments (TIM8, TIM5) are placeholders.
  *    Confirm by checking which timers support encoder mode on F429
