@@ -7,9 +7,11 @@ install(DIRECTORY urdf/
   DESTINATION share/${PROJECT_NAME}/urdf
 )
 
-install(DIRECTORY meshes/
-  DESTINATION share/${PROJECT_NAME}/meshes
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/meshes/")
+  install(DIRECTORY meshes/
+    DESTINATION share/${PROJECT_NAME}/meshes
+  )
+endif()
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
