@@ -18,7 +18,6 @@
 #include <WiFi.h>
 #include <AsyncUDP.h>
 #include "nvs_config.h"
-#include "wifi_transport.h"
 
 /* ── Configuration ───────────────────────────────────────────── */
 #define AGENT_UDP_PORT      8888
@@ -80,9 +79,9 @@ void loop(void)
         uint8_t buf[256];
         size_t n = Serial2.readBytes(buf, sizeof(buf));
         if (n > 0) {
-            udp.writeTo(buf, n,
-                        IPAddress().fromString(cfg.agent_ip),
-                        AGENT_UDP_PORT);
+            IPAddress agent_addr;
+            agent_addr.fromString(cfg.agent_ip);
+            udp.writeTo(buf, n, agent_addr, AGENT_UDP_PORT);
         }
     }
 

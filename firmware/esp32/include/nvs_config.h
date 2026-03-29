@@ -16,7 +16,9 @@
 #define NVS_KEY_PASSWORD    "password"
 #define NVS_KEY_AGENT_IP    "agent_ip"
 
+#ifndef MAX_SSID_LEN
 #define MAX_SSID_LEN        64
+#endif
 #define MAX_PASSWORD_LEN    64
 #define MAX_IP_LEN          16
 
