@@ -4,13 +4,13 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│               Host VM (Ubuntu 22.04)                    │
+│               Host VM (Ubuntu 24.04)                    │
 │    RVIZ2 · Foxglove · SSH dev · remote teleop           │
 │    (optional — not required on robot)                   │
 └───────────────────────┬─────────────────────────────────┘
                         │ Ethernet / WiFi (ROS2 DDS)
 ┌───────────────────────▼─────────────────────────────────┐
-│            Raspberry Pi 5 — ROS2 Humble                 │
+│            Raspberry Pi 5 — ROS2 Jazzy                 │
 │                                                         │
 │  microROS agent (UDP:8888)   robot_localization EKF     │
 │  Nav2 stack                  twist_mux                  │

@@ -13,7 +13,7 @@ following the official Yahboom lesson packs. All 6 software phases complete.
 | 520 motors × 2 + encoder | Drive wheels | TIM3/TIM4 PWM |
 | ESP32 | microROS WiFi bridge | UART ↔ UDP |
 | HC-SR04 | Obstacle detection | TIM input capture |
-| Raspberry Pi 5 | On-robot ROS2 Humble compute | Ethernet / WiFi |
+| Raspberry Pi 5 | On-robot ROS2 Jazzy compute | Ethernet / WiFi |
 | ILI9341 LCD (onboard) | Status display | SPI5 |
 | YDLIDAR X4 | SLAM mapping + obstacle avoidance | USB → /dev/ydlidar |
 | CSI / USB camera | Vision module (QR, face tracking) | Pi 5 CSI or USB |
@@ -32,7 +32,7 @@ HC-SR04           ────────────────────�
                                                     WiFi UDP (microROS)
                                                               │
                                                     Raspberry Pi 5
-                                              (ROS2 Humble, microROS agent,
+                                              (ROS2 Jazzy, microROS agent,
                                                Nav2, SLAM Toolbox, EKF,
                                                YDLIDAR, vision nodes)
                                                               │
@@ -113,7 +113,7 @@ pio run -e esp32-bridge -t upload
 
 ```bash
 cd ros2_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 colcon build --symlink-install
 source install/setup.bash
 ```

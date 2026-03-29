@@ -69,7 +69,7 @@ until the gate passes.
 1.2 Build ROS2 workspace on Pi 5:
   bash scripts/setup_pi5.sh           # if not already done
   cd ros2_ws
-  source /opt/ros/humble/setup.bash
+  source /opt/ros/jazzy/setup.bash
   rosdep install --from-paths src --ignore-src -r -y
   colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
   source install/setup.bash
@@ -92,7 +92,7 @@ until the gate passes.
   # Watch for: "New client connected. Client ID: 1"
 
 1.6 Launch full ROS2 stack:
-  source /opt/ros/humble/setup.bash && source ros2_ws/install/setup.bash
+  source /opt/ros/jazzy/setup.bash && source ros2_ws/install/setup.bash
   ros2 launch sbr_bringup robot.launch.py
 
 ### Gate 1 — must pass before Section 2
@@ -326,8 +326,8 @@ Gate 4B: Robot balances unsupported ≥ 30 seconds on flat floor.
 ### Prerequisite: Gate 4 passed. YDLIDAR X4 connected to Pi 5 USB.
 
 5.1 LiDAR setup:
-  sudo apt install ros-humble-ydlidar-ros2-driver
-  sudo cp /opt/ros/humble/share/ydlidar_ros2_driver/startup/udev/*.rules \
+  sudo apt install ros-jazzy-ydlidar-ros2-driver
+  sudo cp /opt/ros/jazzy/share/ydlidar_ros2_driver/startup/udev/*.rules \
        /etc/udev/rules.d/
   sudo udevadm control --reload && sudo udevadm trigger
   ls /dev/ydlidar           # must exist
@@ -392,7 +392,7 @@ Gate 4B: Robot balances unsupported ≥ 30 seconds on flat floor.
 6.1 Camera bring-up:
   # CSI camera (Pi 5 preferred)
   libcamera-hello --list-cameras
-  sudo apt install python3-picamera2 ros-humble-image-pipeline
+  sudo apt install python3-picamera2 ros-jazzy-image-pipeline
 
   # USB camera (alternative)
   ls /dev/video*

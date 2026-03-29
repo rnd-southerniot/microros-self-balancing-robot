@@ -31,7 +31,7 @@ Expected build time: 5–15 minutes first run.
 ```bash
 bash scripts/setup_pi5.sh             # if not already done
 cd ros2_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
@@ -61,7 +61,7 @@ New client connected. Client ID: 1
 ### 1.5 — Verify base topics
 
 ```bash
-source /opt/ros/humble/setup.bash && source ros2_ws/install/setup.bash
+source /opt/ros/jazzy/setup.bash && source ros2_ws/install/setup.bash
 ros2 topic hz /imu/data               # ≥ 100 Hz
 ros2 topic hz /odom                   # ≥ 50 Hz
 ros2 topic echo /balance_state --once # fault_flags should be 0
@@ -213,12 +213,12 @@ IMU_ZERO_ANGLE_DEG=<val>"
 
 ```bash
 # Set up udev rule so device appears as /dev/ydlidar
-sudo cp /opt/ros/humble/share/ydlidar_ros2_driver/startup/udev/*.rules \
+sudo cp /opt/ros/jazzy/share/ydlidar_ros2_driver/startup/udev/*.rules \
      /etc/udev/rules.d/
 sudo udevadm control --reload && sudo udevadm trigger
 ls /dev/ydlidar   # must exist
 
-sudo apt install ros-humble-ydlidar-ros2-driver
+sudo apt install ros-jazzy-ydlidar-ros2-driver
 ros2 launch sbr_bringup lidar.launch.py
 ros2 topic hz /scan                   # ≥ 5 Hz
 ```
@@ -267,7 +267,7 @@ libcamera-hello --list-cameras
 # USB
 ls /dev/video*
 
-sudo apt install ros-humble-image-pipeline python3-opencv python3-picamera2
+sudo apt install ros-jazzy-image-pipeline python3-opencv python3-picamera2
 ros2 launch sbr_bringup vision.launch.py
 ros2 topic hz /camera/image_raw       # ≥ 15 Hz
 ```

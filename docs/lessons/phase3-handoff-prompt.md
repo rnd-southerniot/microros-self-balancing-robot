@@ -121,7 +121,7 @@ On first connection from STM32, the agent log should show:
 
 On Pi 5 (with agent running and STM32 connected):
 
-  source /opt/ros/humble/setup.bash
+  source /opt/ros/jazzy/setup.bash
 
   # Check all expected topics appear
   ros2 topic list
@@ -151,7 +151,7 @@ Run setup script if not already done:
 
 Then build:
   cd ros2_ws
-  source /opt/ros/humble/setup.bash
+  source /opt/ros/jazzy/setup.bash
   rosdep install --from-paths src --ignore-src -r -y
   colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
@@ -180,7 +180,7 @@ Common issues to check:
 
 ### Step 7 — Launch full robot stack
 
-  source /opt/ros/humble/setup.bash
+  source /opt/ros/jazzy/setup.bash
   source ros2_ws/install/setup.bash
   ros2 launch sbr_bringup robot.launch.py
 
@@ -199,7 +199,7 @@ Verify EKF is fusing correctly:
 ### Step 8 — Keyboard teleop
 
 In a second terminal on Pi 5:
-  source /opt/ros/humble/setup.bash
+  source /opt/ros/jazzy/setup.bash
   source ros2_ws/install/setup.bash
   ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args --remap cmd_vel:=/cmd_vel_teleop
@@ -241,7 +241,7 @@ All checks must pass. If any fail, fix before marking Phase 3 complete.
 | EKF not publishing /odometry/filtered | ekf_params.yaml path wrong | Check share/${PROJECT_NAME}/config install path |
 | twist_mux not routing cmd_vel | Remap wrong in launch file | Verify cmd_vel_teleop → twist_mux input topic name |
 | safety_node kills cmd_vel immediately | IMU quaternion is (0,0,0,1) = 0° pitch | Correct, should not trigger. Check tilt threshold |
-| colcon build sbr_controller fails | tf2/tf2_ros missing | sudo apt install ros-humble-tf2-ros |
+| colcon build sbr_controller fails | tf2/tf2_ros missing | sudo apt install ros-jazzy-tf2-ros |
 | microROS agent loses connection | WiFi packet loss | Use 5GHz WiFi; check ESP32 UDP watchdog |
 
 ---

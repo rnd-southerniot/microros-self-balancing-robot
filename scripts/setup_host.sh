@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# setup_pi5.sh
-# One-shot setup for Raspberry Pi 5 — installs ROS2 Humble,
+# setup_host.sh  (replaces setup_pi5.sh)
+# One-shot setup for Ubuntu 24.04 LTS — installs ROS2 Jazzy,
 # colcon, microROS agent, and project dependencies.
 #
-# Tested on: Ubuntu 24.04 LTS (arm64) on Raspberry Pi 5
+# Tested on: Ubuntu 24.04 LTS (amd64) — Proxmox VM
+#            Ubuntu 24.04 LTS (arm64) — Raspberry Pi 5
+# ROS2 distro: Jazzy Jalisco (Ubuntu 24.04 / Noble native)
 # Run as normal user (not root). Uses sudo internally.
 #
 # Usage:
-#   chmod +x scripts/setup_pi5.sh
-#   ./scripts/setup_pi5.sh
+#   chmod +x scripts/setup_host.sh
+#   ./scripts/setup_host.sh
 
 set -euo pipefail
 
@@ -16,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "=============================================="
-echo "  MicroROS SBR — Raspberry Pi 5 Setup"
+echo "  MicroROS SBR — Host Setup (ROS2 Jazzy)"
 echo "=============================================="
 echo "Repo: $REPO_ROOT"
 echo ""
@@ -26,8 +28,8 @@ echo "[1/8] Updating system packages..."
 sudo apt-get update -qq
 sudo apt-get upgrade -y -qq
 
-# ── 2. ROS2 Humble ────────────────────────────────────────────────
-echo "[2/8] Installing ROS2 Humble..."
+# ── 2. ROS2 Jazzy ─────────────────────────────────────────────────
+echo "[2/8] Installing ROS2 Jazzy..."
 if ! command -v ros2 &>/dev/null; then
     sudo apt-get install -y software-properties-common curl
     sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
@@ -36,14 +38,14 @@ if ! command -v ros2 &>/dev/null; then
 http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
         | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
     sudo apt-get update -qq
-    sudo apt-get install -y ros-humble-desktop
-    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-    echo "  ROS2 Humble installed."
+    sudo apt-get install -y ros-jazzy-desktop
+    echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+    echo "  ROS2 Jazzy installed."
 else
-    echo "  ROS2 Humble already installed — skipping."
+    echo "  ROS2 already installed — skipping."
 fi
 
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 # ── 3. ROS2 tools ─────────────────────────────────────────────────
 echo "[3/8] Installing ROS2 build tools and dependencies..."
@@ -52,12 +54,17 @@ sudo apt-get install -y \
     python3-rosdep \
     python3-vcstool \
     python3-pip \
-    ros-humble-robot-localization \
-    ros-humble-twist-mux \
-    ros-humble-teleop-twist-keyboard \
-    ros-humble-tf2-tools \
-    ros-humble-rqt \
-    ros-humble-rqt-common-plugins
+    ros-jazzy-robot-localization \
+    ros-jazzy-twist-mux \
+    ros-jazzy-teleop-twist-keyboard \
+    ros-jazzy-tf2-tools \
+    ros-jazzy-rqt \
+    ros-jazzy-rqt-common-plugins \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-slam-toolbox \
+    ros-jazzy-ydlidar-ros2-driver \
+    ros-jazzy-image-pipeline \
+    ros-jazzy-camera-calibration
 
 # ── 4. rosdep ─────────────────────────────────────────────────────
 echo "[4/8] Initialising rosdep..."
@@ -74,8 +81,8 @@ else
     echo "  Docker already installed — skipping."
 fi
 
-# Pull microROS agent image
-docker pull microros/micro-ros-agent:humble
+# Pull microROS agent image — Jazzy tag
+docker pull microros/micro-ros-agent:jazzy
 echo "  microROS agent image pulled."
 
 # ── 6. Build ROS2 workspace ───────────────────────────────────────
@@ -85,14 +92,17 @@ rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 echo "  ros2_ws built."
 
-# ── 7. PlatformIO CLI (optional, for firmware builds on Pi) ───────
+# ── 7. PlatformIO CLI ─────────────────────────────────────────────
 echo "[7/8] Installing PlatformIO CLI..."
-pip install platformio --quiet
+pip install platformio --quiet --break-system-packages
 echo "  PlatformIO installed."
 
 # ── 8. Shell environment ──────────────────────────────────────────
 echo "[8/8] Configuring shell environment..."
 ROS2_WS_SETUP="$REPO_ROOT/ros2_ws/install/setup.bash"
+if ! grep -q "ros/jazzy/setup.bash" ~/.bashrc; then
+    echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+fi
 if ! grep -q "$ROS2_WS_SETUP" ~/.bashrc; then
     echo "source $ROS2_WS_SETUP" >> ~/.bashrc
     echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc

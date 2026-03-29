@@ -84,10 +84,10 @@ Common options: YDLIDAR X4, X3, T-mini; SLAMTEC RPLIDAR A1.
 Install the appropriate driver on Raspberry Pi 5:
 
   # YDLIDAR (most common with Yahboom kits)
-  sudo apt install ros-humble-ydlidar-ros2-driver
+  sudo apt install ros-jazzy-ydlidar-ros2-driver
 
   # RPLIDAR
-  sudo apt install ros-humble-rplidar-ros
+  sudo apt install ros-jazzy-rplidar-ros
 
 Check USB device:
   ls /dev/ttyUSB* or ls /dev/ttyACM*
@@ -139,7 +139,7 @@ lidar-only launch for testing without the full stack.
 
 ### Step 4 — Install SLAM Toolbox
 
-  sudo apt install ros-humble-slam-toolbox
+  sudo apt install ros-jazzy-slam-toolbox
 
 Add slam_toolbox_params.yaml to ros2_ws/src/sbr_bringup/config/:
 
@@ -205,7 +205,7 @@ Create maps/ directory and add maps/*.pgm to .gitignore.
 
 ### Step 7 — Install Nav2 and configure
 
-  sudo apt install ros-humble-nav2-bringup
+  sudo apt install ros-jazzy-nav2-bringup
 
 Create ros2_ws/src/sbr_bringup/config/nav2_params.yaml.
 Key parameters for a differential-drive self-balancing robot:

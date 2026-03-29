@@ -91,9 +91,9 @@ Detect camera:
   v4l2-ctl --list-devices
 
 Install dependencies:
-  sudo apt install ros-humble-image-pipeline \
-                   ros-humble-camera-calibration \
-                   ros-humble-vision-opencv \
+  sudo apt install ros-jazzy-image-pipeline \
+                   ros-jazzy-camera-calibration \
+                   ros-jazzy-vision-opencv \
                    python3-opencv \
                    python3-picamera2    # CSI only
 
@@ -109,8 +109,8 @@ For CSI camera (recommended on Pi 5):
     /camera/camera_info    sensor_msgs/CameraInfo @ 30 Hz
 
 For USB camera:
-  Use ros-humble-usb-cam package:
-    sudo apt install ros-humble-usb-cam
+  Use ros-jazzy-usb-cam package:
+    sudo apt install ros-jazzy-usb-cam
     Configure in config/camera_params.yaml
 
 Create ros2_ws/src/sbr_bringup/launch/vision.launch.py:

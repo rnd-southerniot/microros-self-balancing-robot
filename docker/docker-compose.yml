@@ -10,16 +10,16 @@ version: "3.8"
 #
 # Prerequisites:
 #   - Docker + Docker Compose installed on Pi 5
-#   - Pi 5 and ESP32 on same WiFi network
+#   - VM/Pi 5 and ESP32 on same network (vmbr0 bridged)
 #   - ESP32 provisioned with Pi 5 IP via provision_nvs.py
 
 services:
 
   # ── microROS agent ─────────────────────────────────────────────
   # Bridges microROS UDP traffic to the full ROS2 graph on Pi 5.
-  # ESP32 connects to Pi 5 IP:8888 over WiFi UDP.
+  # ESP32 connects to VM/Pi5 IP:8888 over WiFi UDP.
   agent:
-    image: microros/micro-ros-agent:humble
+    image: microros/micro-ros-agent:jazzy
     network_mode: host
     restart: unless-stopped
     command: udp4 --port 8888 -v4

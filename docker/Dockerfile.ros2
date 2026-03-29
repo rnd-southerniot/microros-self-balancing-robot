@@ -1,15 +1,15 @@
 # Dockerfile.ros2
-# ROS2 Humble development environment for Raspberry Pi 5 (ARM64)
-# Includes: ROS2 Humble, Nav2, robot_localization, twist_mux,
+# ROS2 Jazzy development environment for Raspberry Pi 5 (ARM64)
+# Includes: ROS2 Jazzy, Nav2, robot_localization, twist_mux,
 #           colcon, rosdep, and project workspace dependencies.
 #
-# Build:   docker build -f docker/Dockerfile.ros2 -t sbr-ros2:humble .
+# Build:   docker build -f docker/Dockerfile.ros2 -t sbr-ros2:jazzy .
 # Run dev: docker compose -f docker/docker-compose.yml run ros2
 
-FROM ros:humble-ros-base-jammy
+FROM ros:jazzy-ros-base-noble
 
 LABEL maintainer="southerniot"
-LABEL description="MicroROS SBR — ROS2 Humble ARM64"
+LABEL description="MicroROS SBR — ROS2 Jazzy ARM64"
 
 # ── System dependencies ────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,14 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-rosdep \
     python3-pip \
     python3-vcstool \
-    ros-humble-robot-localization \
-    ros-humble-twist-mux \
-    ros-humble-teleop-twist-keyboard \
-    ros-humble-tf2-tools \
-    ros-humble-rqt \
-    ros-humble-rqt-common-plugins \
-    ros-humble-nav2-bringup \
-    ros-humble-slam-toolbox \
+    ros-jazzy-robot-localization \
+    ros-jazzy-twist-mux \
+    ros-jazzy-teleop-twist-keyboard \
+    ros-jazzy-tf2-tools \
+    ros-jazzy-rqt \
+    ros-jazzy-rqt-common-plugins \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-slam-toolbox \
     build-essential \
     cmake \
     git \
@@ -40,7 +40,7 @@ RUN rosdep init 2>/dev/null || true && rosdep update
 WORKDIR /ros2_ws
 
 # Source ROS2 on shell start
-RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash" \
     >> /root/.bashrc && \
     echo "export ROS_DOMAIN_ID=0" >> /root/.bashrc
