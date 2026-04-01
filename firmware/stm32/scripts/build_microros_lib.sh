@@ -27,10 +27,10 @@ echo "=============================================="
 BUILD_DIR=$(mktemp -d)
 trap "rm -rf $BUILD_DIR" EXIT
 
-mkdir -p "$BUILD_DIR/library_generation"
+mkdir -p "$BUILD_DIR/microros_static_library/library_generation"
 
 # ── Toolchain file for Cortex-M4 with FPU ──
-cat > "$BUILD_DIR/library_generation/toolchain.cmake" << 'TOOLCHAIN'
+cat > "$BUILD_DIR/microros_static_library/library_generation/toolchain.cmake" << 'TOOLCHAIN'
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
@@ -48,7 +48,7 @@ set(__BIG_ENDIAN__ 0)
 TOOLCHAIN
 
 # ── colcon.meta: configure microROS packages ──
-cat > "$BUILD_DIR/library_generation/colcon.meta" << 'META'
+cat > "$BUILD_DIR/microros_static_library/library_generation/colcon.meta" << 'META'
 {
     "names": {
         "tracetools": {
@@ -74,7 +74,7 @@ cat > "$BUILD_DIR/library_generation/colcon.meta" << 'META'
 META
 
 # ── Extra packages to include (message types) ──
-cat > "$BUILD_DIR/library_generation/extra_packages.repos" << 'REPOS'
+cat > "$BUILD_DIR/microros_static_library/library_generation/extra_packages.repos" << 'REPOS'
 repositories:
 REPOS
 
@@ -84,14 +84,21 @@ docker pull microros/micro_ros_static_library_builder:jazzy
 echo "[2/3] Building static library (this takes ~10 minutes)..."
 docker run --rm \
     -v "$BUILD_DIR":/project \
+    --env MICROROS_LIBRARY_FOLDER=microros_static_library \
     microros/micro_ros_static_library_builder:jazzy
 
 echo "[3/3] Copying output..."
 mkdir -p "$OUTPUT_DIR"
 
-if [ -f "$BUILD_DIR/libmicroros/libmicroros.a" ]; then
-    cp "$BUILD_DIR/libmicroros/libmicroros.a" "$OUTPUT_DIR/"
-    cp -r "$BUILD_DIR/libmicroros/include" "$OUTPUT_DIR/"
+LIB_FILE="$BUILD_DIR/microros_static_library/libmicroros.a"
+INC_DIR="$BUILD_DIR/microros_static_library/include"
+# Fallback paths
+[ ! -f "$LIB_FILE" ] && LIB_FILE="$BUILD_DIR/libmicroros/libmicroros.a"
+[ ! -d "$INC_DIR" ]   && INC_DIR="$BUILD_DIR/libmicroros/include"
+
+if [ -f "$LIB_FILE" ]; then
+    cp "$LIB_FILE" "$OUTPUT_DIR/"
+    cp -r "$INC_DIR" "$OUTPUT_DIR/"
     echo ""
     echo "=============================================="
     echo "  SUCCESS!"

@@ -17,6 +17,11 @@
 #include <math.h>
 #include <string.h>
 
+#ifdef UROS_ENABLED
+#include "uros_transport.h"
+#include "uros_node.h"
+#endif
+
 /* ── Peripheral handles ─────────────────────────────────────── */
 I2C_HandleTypeDef  hi2c3;
 UART_HandleTypeDef huart1;
@@ -92,6 +97,18 @@ int main(void)
              PID_STEER_IMAX, MAX_MOTOR_DUTY * 0.5f, 0.0f,
              1.0f / BALANCE_CTRL_HZ);
 
+    /* microROS init (if enabled) */
+#ifdef UROS_ENABLED
+    uros_transport_init();
+    if (!uros_node_init()) {
+        /* Agent not reachable — blink both LEDs */
+        while (1) {
+            LED_Set(1, 1); HAL_Delay(300);
+            LED_Set(0, 0); HAL_Delay(300);
+        }
+    }
+#endif
+
     /* Start timebase timer */
     HAL_TIM_Base_Start_IT(&htim6);
 
@@ -112,6 +129,9 @@ int main(void)
             if (icm20948_read(&imu_data)) {
                 imu_fault_t f = imu_filter_update(&imu_filt, &imu_data);
                 if (f != IMU_OK) fault_flags |= f;
+#ifdef UROS_ENABLED
+                uros_publish_imu(&imu_data);
+#endif
             } else {
                 fault_flags |= IMU_FAULT_PRIMARY;
             }
@@ -133,7 +153,11 @@ int main(void)
                 continue;
             }
 
-            /* cmd_vel timeout */
+            /* cmd_vel: read from microROS subscriber or timeout */
+#ifdef UROS_ENABLED
+            uros_get_cmd_vel(&cmd_vel_linear, &cmd_vel_angular);
+            cmd_vel_stamp = uros_get_cmd_vel_stamp();
+#endif
             if (now - cmd_vel_stamp > CMD_VEL_TIMEOUT_MS) {
                 cmd_vel_linear  = 0.0f;
                 cmd_vel_angular = 0.0f;
@@ -181,8 +205,20 @@ int main(void)
             odom_x += dc * cosf(odom_theta);
             odom_y += dc * sinf(odom_theta);
 
-            /* TODO: publish via microROS when UROS_ENABLED */
+#ifdef UROS_ENABLED
+            float vel_linear  = dc * ODOM_PUB_HZ;
+            float vel_angular = dtheta * ODOM_PUB_HZ;
+            uros_publish_odom(odom_x, odom_y, odom_theta,
+                              vel_linear, vel_angular);
+            uros_publish_balance_state(
+                imu_filter_get_pitch(&imu_filt), fault_flags);
+#endif
         }
+
+        /* ── microROS spin (non-blocking) ── */
+#ifdef UROS_ENABLED
+        uros_spin_once(1);
+#endif
 
         /* Yield to prevent tight spin — WFI waits for next interrupt */
         __WFI();
