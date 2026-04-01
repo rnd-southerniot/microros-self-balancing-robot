@@ -9,7 +9,7 @@
 #
 # Output:
 #   lib/microros/libmicroros.a
-#   lib/microros/include/  (all microROS headers)
+#   lib/microros/include/
 
 set -euo pipefail
 
@@ -23,14 +23,15 @@ echo "  Target: STM32F429 (Cortex-M4F, hard float)"
 echo "  Output: $OUTPUT_DIR"
 echo "=============================================="
 
-# Create build workspace
+# Create build workspace with expected directory structure
 BUILD_DIR=$(mktemp -d)
 trap "rm -rf $BUILD_DIR" EXIT
 
-mkdir -p "$BUILD_DIR/microros_static_library/library_generation"
+LIBGEN="$BUILD_DIR/microros_static_library/library_generation"
+mkdir -p "$LIBGEN"
 
 # ── Toolchain file for Cortex-M4 with FPU ──
-cat > "$BUILD_DIR/microros_static_library/library_generation/toolchain.cmake" << 'TOOLCHAIN'
+cat > "$LIBGEN/toolchain.cmake" << 'TOOLCHAIN'
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
@@ -48,7 +49,7 @@ set(__BIG_ENDIAN__ 0)
 TOOLCHAIN
 
 # ── colcon.meta: configure microROS packages ──
-cat > "$BUILD_DIR/microros_static_library/library_generation/colcon.meta" << 'META'
+cat > "$LIBGEN/colcon.meta" << 'META'
 {
     "names": {
         "tracetools": {
@@ -73,15 +74,95 @@ cat > "$BUILD_DIR/microros_static_library/library_generation/colcon.meta" << 'ME
 }
 META
 
-# ── Extra packages to include (message types) ──
-cat > "$BUILD_DIR/microros_static_library/library_generation/extra_packages.repos" << 'REPOS'
+# ── Extra packages (empty — using standard message types) ──
+mkdir -p "$LIBGEN/extra_packages"
+cat > "$LIBGEN/extra_packages/extra_packages.repos" << 'REPOS'
 repositories:
 REPOS
 
-echo "[1/3] Pulling Docker image..."
-docker pull microros/micro_ros_static_library_builder:jazzy
+# ── library_generation.sh — the script Docker's entrypoint calls ──
+cat > "$LIBGEN/library_generation.sh" << 'GENSCRIPT'
+#!/bin/bash
+set -e
 
+export BASE_PATH=/project/$MICROROS_LIBRARY_FOLDER
+
+######## Init ########
+apt-get update -qq
+apt-get install -y -qq gcc-arm-none-eabi > /dev/null
+
+cd /uros_ws
+source /opt/ros/$ROS_DISTRO/setup.bash
+source install/local_setup.bash
+
+ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+
+######## Adding extra packages ########
+pushd firmware/mcu_ws > /dev/null
+
+    # tf2_msgs
+    git clone -b jazzy https://github.com/ros2/geometry2 2>/dev/null || true
+    if [ -d geometry2/tf2_msgs ]; then
+        cp -R geometry2/tf2_msgs ros2/tf2_msgs
+        rm -rf geometry2
+    fi
+
+    # User extra packages
+    mkdir -p extra_packages
+    pushd extra_packages > /dev/null
+        cp -R $BASE_PATH/library_generation/extra_packages/* . 2>/dev/null || true
+        if [ -f extra_packages.repos ]; then
+            vcs import --input extra_packages.repos 2>/dev/null || true
+        fi
+    popd > /dev/null
+
+popd > /dev/null
+
+######## Build with hardcoded CFLAGS for Cortex-M4F ########
+export RET_CFLAGS="-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -fno-exceptions -nostdlib -DCLOCK_MONOTONIC=0"
+export TOOLCHAIN_PREFIX=/usr/bin/arm-none-eabi-
+
+echo "Building with CFLAGS: $RET_CFLAGS"
+ros2 run micro_ros_setup build_firmware.sh \
+    $BASE_PATH/library_generation/toolchain.cmake \
+    $BASE_PATH/library_generation/colcon.meta
+
+######## Collect output ########
+find firmware/build/include/ -name "*.c" -delete
+rm -rf $BASE_PATH/libmicroros
+mkdir -p $BASE_PATH/libmicroros/include
+cp -R firmware/build/include/* $BASE_PATH/libmicroros/include/
+cp firmware/build/libmicroros.a $BASE_PATH/libmicroros/libmicroros.a
+
+######## Fix nested include paths ########
+pushd firmware/mcu_ws > /dev/null
+    INCLUDE_ROS2_PACKAGES=$(colcon list | awk '{print $1}' | awk -v d=" " '{s=(NR==1?s:s d)$0}END{print s}')
+popd > /dev/null
+
+for var in ${INCLUDE_ROS2_PACKAGES}; do
+    if [ -d "$BASE_PATH/libmicroros/include/${var}/${var}" ]; then
+        rsync -r $BASE_PATH/libmicroros/include/${var}/${var}/* $BASE_PATH/libmicroros/include/${var}
+        rm -rf $BASE_PATH/libmicroros/include/${var}/${var}
+    fi
+done
+
+######## Fix permissions ########
+chmod -R 777 $BASE_PATH/libmicroros/
+
+echo "===== microROS static library build complete ====="
+ls -lh $BASE_PATH/libmicroros/libmicroros.a
+GENSCRIPT
+chmod +x "$LIBGEN/library_generation.sh"
+
+# ── Dummy Makefile so Docker doesn't complain ──
+cat > "$BUILD_DIR/Makefile" << 'MAKEFILE'
+print_cflags:
+	@echo "-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -fno-exceptions -nostdlib"
+MAKEFILE
+
+echo "[1/3] Docker image already pulled"
 echo "[2/3] Building static library (this takes ~10 minutes)..."
+
 docker run --rm \
     -v "$BUILD_DIR":/project \
     --env MICROROS_LIBRARY_FOLDER=microros_static_library \
@@ -90,11 +171,8 @@ docker run --rm \
 echo "[3/3] Copying output..."
 mkdir -p "$OUTPUT_DIR"
 
-LIB_FILE="$BUILD_DIR/microros_static_library/libmicroros.a"
-INC_DIR="$BUILD_DIR/microros_static_library/include"
-# Fallback paths
-[ ! -f "$LIB_FILE" ] && LIB_FILE="$BUILD_DIR/libmicroros/libmicroros.a"
-[ ! -d "$INC_DIR" ]   && INC_DIR="$BUILD_DIR/libmicroros/include"
+LIB_FILE="$BUILD_DIR/microros_static_library/libmicroros/libmicroros.a"
+INC_DIR="$BUILD_DIR/microros_static_library/libmicroros/include"
 
 if [ -f "$LIB_FILE" ]; then
     cp "$LIB_FILE" "$OUTPUT_DIR/"
@@ -106,7 +184,7 @@ if [ -f "$LIB_FILE" ]; then
     echo "  Headers: $OUTPUT_DIR/include/"
     echo "=============================================="
 else
-    echo "ERROR: libmicroros.a not found in build output!"
-    ls -la "$BUILD_DIR/libmicroros/" 2>/dev/null || echo "No libmicroros/ directory"
+    echo "ERROR: libmicroros.a not found!"
+    find "$BUILD_DIR" -name "libmicroros.a" 2>/dev/null
     exit 1
 fi
