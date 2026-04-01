@@ -1,0 +1,4 @@
+# Built by Docker on the VM — do not commit (12MB+)
+# Rebuild: cd firmware/stm32 && bash scripts/build_microros_lib.sh
+libmicroros.a
+include/
