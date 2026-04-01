@@ -16,14 +16,6 @@
 #include <assert.h>
 #include <string.h>
 
-/* Stub ICM-20948 type for native build */
-typedef struct {
-    float accel_x, accel_y, accel_z;
-    float gyro_x,  gyro_y,  gyro_z;
-    float mag_x,   mag_y,   mag_z;
-    float temp_c;
-} icm20948_data_t;
-
 /* Stub robot_params for native build */
 #define L3GD20_DIVERGE_THRESHOLD 5.0f
 
