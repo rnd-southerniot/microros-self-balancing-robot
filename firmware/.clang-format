@@ -1,0 +1,61 @@
+# STM32 / embedded-C style — Southern IoT R&D
+# LLVM base, tuned for STM32 HAL + bare-metal firmware.
+# Applied automatically by the format-on-edit PostToolUse hook.
+---
+Language:        Cpp
+BasedOnStyle:    LLVM
+
+IndentWidth:     4
+TabWidth:        4
+UseTab:          Never
+ContinuationIndentWidth: 4
+ColumnLimit:     100
+
+PointerAlignment: Left
+DerivePointerAlignment: false
+
+# Braces: keep functions on their own line (Allman for functions), attached elsewhere.
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction:   true
+  AfterControlStatement: false
+  AfterStruct:     false
+  AfterEnum:       false
+  AfterUnion:      false
+  BeforeElse:      false
+  BeforeCatch:     false
+
+# Never silently collapse bodies — important for review of ISRs and guards.
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+InsertBraces:    true
+
+# Register maps / HAL #define tables read far better column-aligned.
+AlignConsecutiveMacros:
+  Enabled:          true
+  AcrossEmptyLines: true
+  AcrossComments:   true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: true
+AlignEscapedNewlines: Left
+AlignOperands:   true
+
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: false
+SpacesBeforeTrailingComments: 1
+
+IndentCaseLabels: true
+IndentPPDirectives: AfterHash
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# Keep firmware includes stable; don't reorder across HAL/CMSIS groups.
+SortIncludes:    false
+ReflowComments:  false
+...
