@@ -11,7 +11,7 @@ UseTab:          Never
 ContinuationIndentWidth: 4
 ColumnLimit:     100
 
-PointerAlignment: Left
+PointerAlignment: Right
 DerivePointerAlignment: false
 
 # Braces: keep functions on their own line (Allman for functions), attached elsewhere.
@@ -27,19 +27,19 @@ BraceWrapping:
 
 # Never silently collapse bodies — important for review of ISRs and guards.
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
-InsertBraces:    true
+InsertBraces:    false
 
 # Register maps / HAL #define tables read far better column-aligned.
 AlignConsecutiveMacros:
   Enabled:          true
   AcrossEmptyLines: true
   AcrossComments:   true
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: AcrossComments
+AlignConsecutiveDeclarations: AcrossComments
 AlignTrailingComments: true
 AlignEscapedNewlines: Left
 AlignOperands:   true
